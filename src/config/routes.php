@@ -15,6 +15,8 @@
 
 class reqURL {
     private $reqURL; //actuallu requestet url
+    private $uri;
+    public $getParams;
 
     public function __construct()
     {
@@ -22,13 +24,24 @@ class reqURL {
         $this->reqURL = getenv('REQUEST_URI');
 
         if ($this->reqURL != '/') {
-            $this->handleGET();
+
+            if (strpos(getenv('REQUEST_URI'), '?')) {
+                $this->uri = explode('?', getenv('REQUEST_URI'));
+                parse_str($uri[1], $getParams);
+                if (isset($getParams)) {
+                    // Handle get params
+                    $this->handleGET($getParams);
+                }
+            } else {
+                $this->uri[0] = getenv('REQUEST_URI');
+                $this->uri[1] = '';
+            }
         }
 
     }
 
     private function handleGET(): void{
-        $getParams = [];
+        $this->getParams = $getParams;
 
         
     }
@@ -59,14 +72,15 @@ if (getenv('REQUEST_URI') != '/') {
 
     if (!empty($GLOBALS['URLparam'][1])) {
         $pc = count($GLOBALS['URLparam']) - 1;
-        $GLOBALS['reqFile'] = $GLOBALS['URLparam'][$pc] . '.php';
-        print_r('<BR><BR><BR>'.$GLOBALS['reqFile']);
+        //$GLOBALS['reqFile'] = $GLOBALS['URLparam'][$pc] . '.php';
+        //print_r('<BR><BR><BR>'.$GLOBALS['reqFile']);
         for ($i = 1; $i <= $pc; $i++) {
             $GLOBALS['REQuri'] .= '/' . $GLOBALS['URLparam'][$i];
-            //if($i == $pc && substr($GLOBALS['URLparam'][$i], -1) == '/'){
-            if($i == $pc -1){
-                print_r('<BR><BR><BR>'.$GLOBALS['URLparam'][$i]);
-                //$GLOBALS['REQuri'] .= 'index';
+            //print_r(substr($GLOBALS['REQuri'], -1));
+            
+            if(substr($GLOBALS['REQuri'], -1) == '/'){
+                ///print_r('<BR><BR><BR>'.$GLOBALS['URLparam'][$i]);
+                $GLOBALS['REQuri'] .= 'index';
             }
         }
         $GLOBALS['REQuri'] .= '.php';
