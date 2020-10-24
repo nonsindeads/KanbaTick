@@ -1,0 +1,53 @@
+version: '3.7'
+
+# Services
+services:
+
+  # Nginx Service
+  nginx:
+    image: nginx:1.17-alpine
+    ports:
+      - 80:80
+    volumes:
+      - ./src:/var/www/php:ro
+      - ./.docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - phpmyadmindata:/var/www/phpmyadmin:ro
+    depends_on:
+      - php
+      - phpmyadmin
+
+  # PHP Service
+  php:
+    build: ./.docker/php
+    working_dir: /var/www/php
+    volumes:
+      - ./src:/var/www/php
+    depends_on:
+      - mysql
+
+  # MySQL Service
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: demo
+    volumes:
+      - ./.docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - mysqldata:/var/lib/mysql
+
+  # PhpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5-fpm-alpine
+    environment:
+      PMA_HOST: mysql
+    volumes:
+      - phpmyadmindata:/var/www/html
+    depends_on:
+      - mysql
+
+# Volumes
+volumes:
+
+  mysqldata:
+
+  phpmyadmindata:
