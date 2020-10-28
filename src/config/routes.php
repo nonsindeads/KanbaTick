@@ -1,4 +1,6 @@
 <?php
+
+
 // URLparser concept
 // #################
 
@@ -13,55 +15,38 @@
 // login, register, dashboard, profile, administration
 
 
-class reqURL {
-    private $reqURL; //actuallu requestet url
-    private $uri;
-    public $getParams;
-
-    public function __construct()
-    {
-        $GLOBALS['REQuri'] = NULL;
-        $this->reqURL = getenv('REQUEST_URI');
-
-        if ($this->reqURL != '/') {
-
-            if (strpos(getenv('REQUEST_URI'), '?')) {
-                $this->uri = explode('?', getenv('REQUEST_URI'));
-                parse_str($uri[1], $getParams);
-                if (isset($getParams)) {
-                    // Handle get params
-                    $this->handleGET($getParams);
-                }
-            } else {
-                $this->uri[0] = getenv('REQUEST_URI');
-                $this->uri[1] = '';
-            }
-        }
-
-    }
-
-    private function handleGET(): void{
-        $this->getParams = $getParams;
-
-        
-    }
-
-
+function getRoutsFromDB($uri)
+{
+    $arrRouts = $GLOBALS['db']->select(
+        "RoutsConfig",
+        [
+            "ID",
+            "REQ_URL",
+            "HEADER",
+            "FOOTER"
+        ],
+        [
+            "REQ_URL" => $uri
+        ]
+    );
+    return $arrRouts;
 }
 
 
+
 $GLOBALS['REQuri'] = NULL;
+
 if (getenv('REQUEST_URI') != '/') {
     if (strpos(getenv('REQUEST_URI'), 'admin')) {
         $GLOBALS['admin'] = TRUE;
     }
-    
+
     if (strpos(getenv('REQUEST_URI'), '?')) {
         $uri = explode('?', getenv('REQUEST_URI'));
         parse_str($uri[1], $getParams);
         if (isset($getParams)) {
             // Handle get params
-            print_r($getParams);
+            //print_r($getParams);
         }
     } else {
         $uri[0] = getenv('REQUEST_URI');
@@ -72,17 +57,32 @@ if (getenv('REQUEST_URI') != '/') {
 
     if (!empty($GLOBALS['URLparam'][1])) {
         $pc = count($GLOBALS['URLparam']) - 1;
-        //$GLOBALS['reqFile'] = $GLOBALS['URLparam'][$pc] . '.php';
-        //print_r('<BR><BR><BR>'.$GLOBALS['reqFile']);
+
         for ($i = 1; $i <= $pc; $i++) {
             $GLOBALS['REQuri'] .= '/' . $GLOBALS['URLparam'][$i];
-            //print_r(substr($GLOBALS['REQuri'], -1));
-            
-            if(substr($GLOBALS['REQuri'], -1) == '/'){
-                ///print_r('<BR><BR><BR>'.$GLOBALS['URLparam'][$i]);
-                $GLOBALS['REQuri'] .= 'index';
+            //echo '<br><br>';
+            //echo substr($GLOBALS['REQuri'], -4);
+            //echo '<br><br>';
+            if (substr($GLOBALS['REQuri'], -1) == '/') {
+                Print_r('error');
+            } else {
+                if ($pc < 2) {
+                    $GLOBALS['REQuri'] .= '/index';
+                }
             }
         }
         $GLOBALS['REQuri'] .= '.php';
     }
-}     
+
+    $reqView = '/views' . $GLOBALS['REQuri'];
+    $arrViewElements = getRoutsFromDB($reqView);
+    if (!empty($arrViewElements)) {
+        $reqHeader = $GLOBALS['RP'] . $arrViewElements[0]['HEADER'];
+        $reqFooter = $GLOBALS['RP'] . $arrViewElements[0]['FOOTER'];
+    } else {
+        $reqHeader = $GLOBALS['RP'] . '/views/_globals/header.php';
+        $reqFooter = $GLOBALS['RP'] . '/views/_globals/footer.php';
+    }
+   // echo '<br><br>' . $reqHeader;
+   // echo '<br><br>' . $reqFooter;
+}

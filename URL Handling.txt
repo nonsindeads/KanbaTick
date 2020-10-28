@@ -1,0 +1,7 @@
+http://php.test/login			index.php of folder login
+http://php.test/login/			error
+http://php.test/login/test		test.php of folder lgin
+http://php.test/login/test/		error
+http://php.test/login/test/tester	tester.php inside login/test/
+
+urls ending with / are always a error
